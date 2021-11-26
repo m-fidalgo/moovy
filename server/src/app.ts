@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import routes from './routes';
 import './database/connection';
+import routes from './routes';
 
 const port = 3000;
 const app = express();

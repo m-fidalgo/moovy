@@ -8,7 +8,7 @@ export default {
       title: movie.title,
       poster: movie.poster,
       rating: movie.rating,
-      review: reviewsView.render(movie.review),
+      review: movie.review !== null ? reviewsView.render(movie.review) : '',
     };
   },
 

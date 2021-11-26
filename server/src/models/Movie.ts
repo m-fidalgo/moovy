@@ -18,11 +18,12 @@ export default class Movie {
   @Column('varchar')
   poster: string;
 
-  @Column('double')
+  @Column('decimal')
   rating: number;
 
-  @OneToOne(() => Review, (review) => review.movie, {
+  @OneToOne(() => Review, {
     cascade: ['insert', 'update'],
+    nullable: true,
   })
   @JoinColumn()
   review: Review;
