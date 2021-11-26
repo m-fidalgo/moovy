@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Moovy back-end",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx ts-node-dev --respawn ./src/app.ts",
+    "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js"
+  },
+  "keywords": [],
+  "author": "Maira Fidalgo",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "pg": "^8.7.1",
+    "typeorm": "^0.2.41",
+    "typescript": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.11.10",
+    "ts-node-dev": "^1.1.8"
+  }
+}
