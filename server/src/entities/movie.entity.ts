@@ -1,14 +1,15 @@
 import {
-  Column,
+  BaseEntity,
   Entity,
   PrimaryGeneratedColumn,
+  Column,
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import Review from './Review';
+import ReviewEntity from './review.entity';
 
 @Entity('movies')
-export default class Movie {
+export default class MovieEntity extends BaseEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -21,10 +22,10 @@ export default class Movie {
   @Column('decimal')
   rating: number;
 
-  @OneToOne(() => Review, {
+  @OneToOne(() => ReviewEntity, {
     cascade: ['insert', 'update'],
     nullable: true,
   })
   @JoinColumn()
-  review: Review;
+  review: ReviewEntity;
 }
