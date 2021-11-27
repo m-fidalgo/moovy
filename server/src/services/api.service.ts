@@ -25,13 +25,13 @@ export default class ApiService {
     return movies;
   }
 
-  getByTitle(title: string): Promise<InsertMovieDto[]> {
-    return api
+  async getByTitle(title: string): Promise<InsertMovieDto[]> {
+    const data = await api
       .get(`?apikey=${process.env.API_KEY}&type=movie&s=${title}`)
-      .then((resp) => resp.data['Search'])
-      .then((ombdMovies: ApiDto[]) => {
-        const movies = this.mapToMovieDto(ombdMovies);
-        return movies;
-      });
+      .then((resp) => resp.data);
+
+    const omdbMovies = data['Search'];
+
+    if (omdbMovies) return this.mapToMovieDto(omdbMovies);
   }
 }
