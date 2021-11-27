@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import MovieEntity from 'src/entities/movie.entity';
-import ReviewEntity from 'src/entities/review.entity';
 
 @Module({
   imports: [
@@ -22,7 +21,7 @@ import ReviewEntity from 'src/entities/review.entity';
         migrationsDir: '../database/migrations',
       },
     }),
-    TypeOrmModule.forFeature([ReviewEntity, MovieEntity]),
+    TypeOrmModule.forFeature([MovieEntity]),
   ],
 })
 export class DbConfigModule {}

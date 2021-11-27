@@ -6,7 +6,6 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import ReviewEntity from './review.entity';
 
 @Entity('movies')
 export default class MovieEntity extends BaseEntity {
@@ -22,10 +21,6 @@ export default class MovieEntity extends BaseEntity {
   @Column('decimal')
   rating: number;
 
-  @OneToOne(() => ReviewEntity, {
-    cascade: ['insert', 'update'],
-    nullable: true,
-  })
-  @JoinColumn()
-  review: ReviewEntity;
+  @Column('bytea', { nullable: true })
+  review: string;
 }
