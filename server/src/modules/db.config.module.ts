@@ -11,6 +11,7 @@ import MovieEntity from 'src/entities/movie.entity';
       url: process.env.DATABASE_URL,
       synchronize: true,
       autoLoadEntities: true,
+      ssl: { rejectUnauthorized: false },
       migrations: ['../database/migrations/*.ts'],
       entities: ['../entities/*.ts'],
       cli: {
