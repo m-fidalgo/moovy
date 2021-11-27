@@ -10,7 +10,7 @@ import {
 import InsertMovieDto from 'src/dtos/movie/insert-movie.dto';
 import UpdateMovieDto from 'src/dtos/movie/update-movie.dto';
 import MovieEntity from 'src/entities/movie.entity';
-import { MovieService } from 'src/services/movie.service';
+import MovieService from 'src/services/movie.service';
 
 @Controller('library')
 export default class MovieController {

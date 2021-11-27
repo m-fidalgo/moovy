@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsDecimal } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt } from 'class-validator';
 
 export default class InsertMovieDto {
   @IsString()
@@ -7,9 +7,13 @@ export default class InsertMovieDto {
 
   @IsString()
   @IsNotEmpty()
+  imdb_id: string;
+
+  @IsString()
+  @IsNotEmpty()
   poster: string;
 
-  @IsDecimal()
+  @IsInt()
   @IsNotEmpty()
-  rating: number;
+  year: number;
 }

@@ -15,11 +15,14 @@ export default class MovieEntity extends BaseEntity {
   @Column('varchar')
   title: string;
 
+  @Column('varchar', { unique: true })
+  imdb_id: string;
+
   @Column('varchar')
   poster: string;
 
-  @Column('decimal')
-  rating: number;
+  @Column('int')
+  year: number;
 
   @Column('bytea', { nullable: true })
   review: string;

@@ -6,7 +6,7 @@ import InsertMovieDto from 'src/dtos/movie/insert-movie.dto';
 import UpdateMovieDto from 'src/dtos/movie/update-movie.dto';
 
 @Injectable()
-export class MovieService {
+export default class MovieService {
   constructor(
     @InjectRepository(MovieEntity)
     private readonly repository: Repository<MovieEntity>,
