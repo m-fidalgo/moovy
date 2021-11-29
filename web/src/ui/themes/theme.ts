@@ -19,6 +19,15 @@ const theme = createTheme({
       main: '#0ACF83',
     },
   },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 430,
+      md: 600,
+      lg: 750,
+      xl: 920,
+    },
+  },
   typography: {
     fontFamily: 'Inter, sans-serif',
   },

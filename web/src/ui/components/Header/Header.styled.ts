@@ -7,7 +7,7 @@ export const HeaderAppBar = styled(AppBar)`
   color: ${({ theme }) => theme.palette.primary.main};
   padding: 0 50px;
 
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  ${({ theme }) => theme.breakpoints.down('md')} {
     padding: 0;
   }
 `;
@@ -15,7 +15,7 @@ export const HeaderAppBar = styled(AppBar)`
 export const HeaderToolbar = styled(Toolbar)`
   padding: 0 100px;
 
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  ${({ theme }) => theme.breakpoints.down('md')} {
     padding: 0 30px;
     justify-content: space-between;
   }
