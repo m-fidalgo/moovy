@@ -14,8 +14,8 @@ export default function useApiGet() {
     setError('');
 
     try {
-      await getLibraryMovies();
       const omdbMovies = await getOmdbMovies();
+      await getLibraryMovies();
 
       omdbMovies
         .map((movie: MovieInterface) => {
@@ -35,7 +35,7 @@ export default function useApiGet() {
 
       setAllMovies(omdbMovies);
     } catch (error) {
-      setError('Movie not found');
+      setError('We couldn´t find the movies you were looking for :(');
     }
 
     setIsLoading(false);
@@ -56,8 +56,16 @@ export default function useApiGet() {
           })
           .sort((a, b) => (a.title > b.title ? 1 : -1))
       );
+
+      if (libraryMovies.length === 0) {
+        setError(
+          'It looks like there are no movies in your library! Search for a movie you have watched and add it here!'
+        );
+      }
     } catch (error) {
-      setError('Movie not found');
+      setError(
+        'It looks like there are no movies in your library! Search for a movie you have watched and add it here!'
+      );
     }
   }
 

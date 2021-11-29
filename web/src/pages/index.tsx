@@ -6,6 +6,7 @@ import useApiGet from '../data/hooks/useApiGet';
 import Header from '../ui/components/Header/Header';
 import MovieList from '../ui/components/MovieList/MovieList';
 import { MovieInterface } from '../data/@types/MovieInterface';
+import ErrorContainer from '../ui/components/ErrorContainer/ErrorContainer';
 
 const Home: NextPage = () => {
   const {
@@ -43,15 +44,16 @@ const Home: NextPage = () => {
       <Container>
         <Button
           onClick={() => {
-            setText('star');
-            getAllMovies();
+            setText('maze');
+            getLibraryMovies();
           }}
         >
           aa
         </Button>
-        {movies.length > 0 && (
+        {!isLoading && movies.length > 0 && error === '' && (
           <MovieList movies={movies} onAdd={onAdd} onRemove={onRemove} />
         )}
+        {!isLoading && error && <ErrorContainer error={error} />}
       </Container>
     </MainContainer>
   );
