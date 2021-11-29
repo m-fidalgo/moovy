@@ -9,13 +9,13 @@ export default function useApiGet() {
     [allMovies, setAllMovies] = useState([] as MovieInterface[]),
     [error, setError] = useState('');
 
-  async function getAllMovies(text: string) {
+  async function getAllMovies() {
     setIsLoading(true);
     setError('');
 
     try {
-      setLibraryMovies(await getLibraryMovies());
-      const omdbMovies = await getOmdbMovies(text);
+      await getLibraryMovies();
+      const omdbMovies = await getOmdbMovies();
 
       omdbMovies
         .map((movie: MovieInterface) => {
@@ -41,19 +41,27 @@ export default function useApiGet() {
     setIsLoading(false);
   }
 
-  async function getLibraryMovies(): Promise<MovieInterface[]> {
-    const { data } = await ApiService.get<MovieInterface[]>('/library');
+  async function getLibraryMovies() {
+    try {
+      const { data } = await ApiService.get<MovieInterface[]>('/library');
 
-    return data
-      .filter((movie) => movie.title.toLowerCase().includes(text.toLowerCase()))
-      .map((movie) => {
-        movie.is_on_library = true;
-        return movie;
-      })
-      .sort((a, b) => (a.title > b.title ? 1 : -1));
+      setLibraryMovies(
+        data
+          .filter((movie) =>
+            movie.title.toLowerCase().includes(text.toLowerCase())
+          )
+          .map((movie) => {
+            movie.is_on_library = true;
+            return movie;
+          })
+          .sort((a, b) => (a.title > b.title ? 1 : -1))
+      );
+    } catch (error) {
+      setError('Movie not found');
+    }
   }
 
-  async function getOmdbMovies(text: string): Promise<MovieInterface[]> {
+  async function getOmdbMovies(): Promise<MovieInterface[]> {
     const { data } = await ApiService.get<MovieInterface[]>(`/omdb/${text}`);
     return data;
   }

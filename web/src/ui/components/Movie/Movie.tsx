@@ -3,31 +3,32 @@ import { MovieInterface } from '../../../data/@types/MovieInterface';
 import {
   MovieCard,
   MovieCardMedia,
-  MovieCardContent,
   MovieCardTitle,
   MovieCardInfos,
   MovieCardPill,
+  MovieAddCircleIcon,
+  MovieRemoveCircleIcon,
 } from './Movie.styled';
 
 interface MovieProps {
   movie: MovieInterface;
+  onAdd: Function;
+  onRemove: Function;
 }
 
-const Movie: React.FC<MovieProps> = ({ movie }) => {
+const Movie: React.FC<MovieProps> = ({ movie, onAdd, onRemove }) => {
   return (
     <MovieCard>
       <MovieCardMedia image={movie.poster} />
-      <MovieCardContent>
-        <MovieCardTitle>{movie.title}</MovieCardTitle>
-        <MovieCardInfos>
-          <MovieCardPill>{movie.year}</MovieCardPill>
-          {movie.is_on_library ? (
-            <MovieCardPill>Remove</MovieCardPill>
-          ) : (
-            <MovieCardPill>Add</MovieCardPill>
-          )}
-        </MovieCardInfos>
-      </MovieCardContent>
+      <MovieCardTitle>{movie.title}</MovieCardTitle>
+      <MovieCardInfos>
+        <MovieCardPill>{movie.year}</MovieCardPill>
+        {movie.is_on_library ? (
+          <MovieRemoveCircleIcon onClick={() => onRemove(movie)} />
+        ) : (
+          <MovieAddCircleIcon onClick={() => onAdd(movie)} />
+        )}
+      </MovieCardInfos>
     </MovieCard>
   );
 };

@@ -5,6 +5,7 @@ import { Button, Container } from '@mui/material';
 import useApiGet from '../data/hooks/useApiGet';
 import Header from '../ui/components/Header/Header';
 import MovieList from '../ui/components/MovieList/MovieList';
+import { MovieInterface } from '../data/@types/MovieInterface';
 
 const Home: NextPage = () => {
   const {
@@ -26,6 +27,12 @@ const Home: NextPage = () => {
     setMovies(isLibrarySelected ? libraryMovies : allMovies);
   }, [isLibrarySelected, libraryMovies, allMovies]);
 
+  function onAdd(movie: MovieInterface) {
+    console.log('a');
+  }
+
+  function onRemove(movie: MovieInterface) {}
+
   return (
     <MainContainer>
       <Header
@@ -34,8 +41,17 @@ const Home: NextPage = () => {
         onLibrarySelect={() => setIsLibrarySelected(true)}
       />
       <Container>
-        <Button onClick={() => getAllMovies('star')}>aa</Button>
-        {movies.length > 0 && <MovieList movies={movies} />}
+        <Button
+          onClick={() => {
+            setText('star');
+            getAllMovies();
+          }}
+        >
+          aa
+        </Button>
+        {movies.length > 0 && (
+          <MovieList movies={movies} onAdd={onAdd} onRemove={onRemove} />
+        )}
       </Container>
     </MainContainer>
   );

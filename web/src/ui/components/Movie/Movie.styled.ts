@@ -1,7 +1,11 @@
 import { styled } from '@mui/material/styles';
 import { Card, CardMedia, Typography } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 export const MovieCard = styled(Card)`
+  display: flex;
+  flex-direction: column;
   width: calc(calc(100% / 3) - 1em);
   margin: 1em 0.5em;
 
@@ -39,19 +43,20 @@ export const MovieCardMedia = styled(CardMedia)`
   }
 `;
 
-export const MovieCardContent = styled('div')`
-  padding: 10px;
-`;
-
 export const MovieCardTitle = styled(Typography)`
   font-size: 15px;
   font-weight: bold;
+  margin-bottom: auto;
+  padding: 10px;
+  padding-bottom: 0;
 `;
 
 export const MovieCardInfos = styled('div')`
+  align-items: center;
   display: flex;
   justify-content: space-between;
-  padding-top: 10px;
+  justify-self: flex-end;
+  padding: 10px;
 `;
 
 export const MovieCardPill = styled('p')`
@@ -59,4 +64,18 @@ export const MovieCardPill = styled('p')`
   background-color: ${({ theme }) => theme.palette.secondary.main};
   font-size: 12px;
   padding: 0 10px;
+`;
+
+export const MovieAddCircleIcon = styled(AddCircleIcon)`
+  color: ${({ theme }) => theme.palette.success.main};
+  cursor: pointer;
+  height: 30px;
+  width: 30px;
+`;
+
+export const MovieRemoveCircleIcon = styled(RemoveCircleIcon)`
+  color: ${({ theme }) => theme.palette.error.main};
+  cursor: pointer;
+  height: 30px;
+  width: 30px;
 `;

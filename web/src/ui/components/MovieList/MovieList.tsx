@@ -5,13 +5,22 @@ import { MovieListContainer } from './MovieList.styled';
 
 interface MovieListProps {
   movies: MovieInterface[];
+  onAdd: Function;
+  onRemove: Function;
 }
 
-const MovieList: React.FC<MovieListProps> = ({ movies }) => {
+const MovieList: React.FC<MovieListProps> = ({ movies, onAdd, onRemove }) => {
   return (
     <MovieListContainer>
       {movies.map((movie) => {
-        return <Movie key={movie.imdb_id} movie={movie} />;
+        return (
+          <Movie
+            key={movie.imdb_id}
+            movie={movie}
+            onAdd={onAdd}
+            onRemove={onRemove}
+          />
+        );
       })}
     </MovieListContainer>
   );
