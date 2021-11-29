@@ -45,6 +45,13 @@ export default function useApiGet() {
     try {
       const { data } = await ApiService.get<MovieInterface[]>('/library');
 
+      if (data.length === 0) {
+        setError(
+          'It looks like there are no movies in your library! Search for a movie you have watched and add it here!'
+        );
+        return;
+      }
+
       setLibraryMovies(
         data
           .filter((movie) =>
@@ -58,14 +65,10 @@ export default function useApiGet() {
       );
 
       if (libraryMovies.length === 0) {
-        setError(
-          'It looks like there are no movies in your library! Search for a movie you have watched and add it here!'
-        );
+        setError('We couldn´t find the movies you were looking for :(');
       }
     } catch (error) {
-      setError(
-        'It looks like there are no movies in your library! Search for a movie you have watched and add it here!'
-      );
+      setError('We couldn´t find the movies you were looking for :(');
     }
   }
 
@@ -81,6 +84,7 @@ export default function useApiGet() {
     allMovies,
     libraryMovies,
     error,
+    setError,
     getAllMovies,
     getLibraryMovies,
   };

@@ -4,7 +4,7 @@ import { styled } from '@mui/system';
 export const ErrorContainerStyled = styled('div')`
   display: flex;
   flex-direction: column;
-  padding-top: 100px;
+  padding-top: 70px;
   align-items: center;
 `;
 
