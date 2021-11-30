@@ -3,6 +3,7 @@ import { Dimensions, Image, Text, View } from "react-native";
 import { Button, Card, Title } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { MovieInterface } from "../../../data/@types/MovieInterface";
+import ButtonIcon from "../ButtonIcon/ButtonIcon";
 import { movieCardStyle } from "./MovieCard.styles";
 
 interface MovieProps {
@@ -22,9 +23,13 @@ export const MovieCard: React.FC<MovieProps> = ({ item, index, onRecord }) => {
         <Title>{item.title}</Title>
       </Card.Content>
       <Card.Actions style={movieCardStyle.actions}>
-        <Button onPress={() => onRecord(item)}>
-          <Icon name="mic" size={30} color="#000000" />
-        </Button>
+        <ButtonIcon
+          onPress={() => onRecord(item)}
+          name="mic-none"
+          size={30}
+          color="#000000"
+          backgroundColor="#6CD3AE"
+        />
       </Card.Actions>
     </Card>
   );

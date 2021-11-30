@@ -5,7 +5,7 @@ export const movieCardStyle = StyleSheet.create({
     marginTop: 10,
   },
   img: {
-    height: 400,
+    height: 390,
   },
   content: {
     display: "flex",
@@ -14,5 +14,6 @@ export const movieCardStyle = StyleSheet.create({
   },
   actions: {
     justifyContent: "center",
+    height: 80,
   },
 });
