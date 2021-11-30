@@ -22,7 +22,7 @@ export const MovieCard: React.FC<MovieProps> = ({ item, index, onRecord }) => {
         <Title>{item.title}</Title>
       </Card.Content>
       <Card.Actions style={movieCardStyle.actions}>
-        <Button onPress={() => console.log("a")}>
+        <Button onPress={() => onRecord(item)}>
           <Icon name="mic" size={30} color="#000000" />
         </Button>
       </Card.Actions>

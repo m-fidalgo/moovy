@@ -19,7 +19,7 @@ export const MovieCarousel: React.FC<MovieCarouselProps> = ({
   return (
     <View>
       <Carousel
-        layout="tinder"
+        layout="default"
         layoutCardOffset={9}
         ref={carouselRef}
         data={movies}
