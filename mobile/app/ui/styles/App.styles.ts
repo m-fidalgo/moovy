@@ -37,6 +37,10 @@ export const appStyle = StyleSheet.create({
     fontSize: 30,
     marginLeft: 15,
   },
+  modalErrorText: {
+    color: "#fff",
+    fontSize: 25,
+  },
   title: {
     fontSize: 30,
     alignSelf: "flex-start",
