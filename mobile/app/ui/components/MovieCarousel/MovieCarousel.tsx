@@ -1,30 +1,51 @@
-import React, { useRef } from 'react';
-import Carousel from 'react-native-snap-carousel';
-import { MovieInterface } from '../../../data/@types/MovieInterface';
-import MovieCard from '../MovieCard/MovieCard';
+import React, { useState, useRef, Component } from "react";
+import { View } from "react-native";
+import Carousel, { Pagination } from "react-native-snap-carousel";
+import { MovieInterface } from "../../../data/@types/MovieInterface";
+import { MovieCard, ITEM_WIDTH, SLIDER_WIDTH } from "../MovieCard/MovieCard";
 
 interface MovieCarouselProps {
   movies: MovieInterface[];
   onRecord: Function;
-  onRemove: Function;
 }
 
 export const MovieCarousel: React.FC<MovieCarouselProps> = ({
   movies,
   onRecord,
-  onRemove,
 }) => {
+  const [index, setIndex] = useState<number>(0);
+  const carouselRef = useRef<Carousel<MovieInterface>>(null);
+
   return (
-    <Carousel
-      ref={(c) => useRef(c)}
-      data={movies}
-      renderItem={({ item, index }) => {
-        return (
-          <MovieCard movie={item} onRecord={onRecord} onRemove={onRemove} />
-        );
-      }}
-      itemWidth={400}
-      sliderWidth={400}
-    />
+    <View>
+      <Carousel
+        layout="tinder"
+        layoutCardOffset={9}
+        ref={carouselRef}
+        data={movies}
+        renderItem={({ item, index }) => (
+          <MovieCard item={item} index={index} onRecord={onRecord} />
+        )}
+        sliderWidth={SLIDER_WIDTH}
+        itemWidth={ITEM_WIDTH}
+        onSnapToItem={(index) => setIndex(index)}
+        useScrollView={true}
+      />
+      <Pagination
+        dotsLength={movies.length}
+        activeDotIndex={index}
+        carouselRef={carouselRef as any}
+        dotStyle={{
+          width: 10,
+          height: 10,
+          borderRadius: 5,
+          marginHorizontal: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.92)",
+        }}
+        tappableDots={true}
+        inactiveDotOpacity={0.4}
+        inactiveDotScale={0.6}
+      />
+    </View>
   );
 };

@@ -1,27 +1,31 @@
-import * as React from 'react';
-import { Button, Card, Title, Paragraph } from 'react-native-paper';
-import { MovieInterface } from '../../../data/@types/MovieInterface';
-import { movieCardStyle } from './MovieCard.styles';
+import * as React from "react";
+import { Dimensions, Image, Text, View } from "react-native";
+import { Button, Card, Title } from "react-native-paper";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { MovieInterface } from "../../../data/@types/MovieInterface";
+import { movieCardStyle } from "./MovieCard.styles";
 
 interface MovieProps {
-  movie: MovieInterface;
+  item: MovieInterface;
+  index: number;
   onRecord: Function;
-  onRemove: Function;
 }
 
-const MovieCard: React.FC<MovieProps> = ({ movie, onRecord, onRemove }) => {
+export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
+export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
+
+export const MovieCard: React.FC<MovieProps> = ({ item, index, onRecord }) => {
   return (
-    <Card style={movieCardStyle.card}>
-      <Card.Cover source={{ uri: movie.poster }} />
+    <Card style={movieCardStyle.card} key={index}>
+      <Card.Cover source={{ uri: item.poster }} style={movieCardStyle.img} />
       <Card.Content style={movieCardStyle.content}>
-        <Title>{movie.title}</Title>
+        <Title>{item.title}</Title>
       </Card.Content>
       <Card.Actions style={movieCardStyle.actions}>
-        <Button>Cancel</Button>
-        <Button>Ok</Button>
+        <Button onPress={() => console.log("a")}>
+          <Icon name="mic" size={30} color="#000000" />
+        </Button>
       </Card.Actions>
     </Card>
   );
 };
-
-export default MovieCard;

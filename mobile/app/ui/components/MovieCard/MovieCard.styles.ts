@@ -1,21 +1,18 @@
-import { StyleSheet } from 'react-native';
-import { useTheme } from 'react-native-paper';
-
-const { colors, fonts } = useTheme();
+import { StyleSheet } from "react-native";
 
 export const movieCardStyle = StyleSheet.create({
   card: {
-    marginHorizontal: 10,
-    marginTop: 100,
+    marginTop: 10,
+  },
+  img: {
+    height: 400,
   },
   content: {
-    display: 'flex',
-    alignItems: 'center',
+    display: "flex",
+    alignItems: "center",
     marginTop: 10,
   },
   actions: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: "center",
   },
 });
