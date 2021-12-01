@@ -15,6 +15,7 @@ import AudioRecorderPlayer, {
   AudioSourceAndroidType,
 } from "react-native-audio-recorder-player";
 import { Provider, Title, Portal, Modal } from "react-native-paper";
+import { Buffer } from "buffer";
 import { MovieCarousel } from "./ui/components/MovieCarousel/MovieCarousel";
 import { appStyle } from "./ui/styles/App.styles";
 import { MovieInterface } from "./data/@types/MovieInterface";
@@ -26,17 +27,16 @@ import RNFetchBlob from "rn-fetch-blob";
 const App: React.FC = () => {
   const [movies, setMovies] = useState<MovieInterface[]>([]),
     [isLoading, setIsLoading] = useState<boolean>(true),
-    [isModalOpen, setIsModalOpen] = useState<boolean>(false),
+    [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false),
     [selectedMovie, setSelectedMovie] = useState<MovieInterface>(),
     [isPermissionGranted, setIsPermissionGranted] = useState<boolean>(false),
     [reviewUri, setReviewUri] = useState<string>(""),
-    [recordingSecs, setRecordingSecs] = useState<number>(0),
     [recordingTime, setRecordingTime] = useState<string>("00:00:00"),
     [audioRecorderPlayer, setAudioRecorderPlayer] = useState(
       new AudioRecorderPlayer()
     );
 
-  //permissions
+  //useEffect related
   async function getPermissions() {
     if (Platform.OS === "android") {
       let permission = await PermissionsAndroid.requestMultiple([
@@ -58,7 +58,6 @@ const App: React.FC = () => {
     }
   }
 
-  //movies
   async function getMovies() {
     const { data } = await ApiService.get<MovieInterface[]>("/library");
     setMovies(
@@ -80,7 +79,7 @@ const App: React.FC = () => {
 
   //recording
   async function onRecord(movie: MovieInterface) {
-    setIsModalOpen(true);
+    setIsRecordModalOpen(true);
     setSelectedMovie(movie);
   }
 
@@ -94,13 +93,12 @@ const App: React.FC = () => {
     };
     const dirs = RNFetchBlob.fs.dirs;
     const path = Platform.select({
-      ios: "hello.m4a",
-      android: `${dirs.CacheDir}/${selectedMovie?.imdb_id}-review.mp4`,
+      ios: `${selectedMovie?.imdb_id}-review.m4a`,
+      android: `${dirs.CacheDir}/${selectedMovie?.imdb_id}-review.mp3`,
     });
 
     const uri = await audioRecorderPlayer.startRecorder(path, audioSet);
     audioRecorderPlayer.addRecordBackListener((e) => {
-      setRecordingSecs(e.currentPosition);
       setRecordingTime(
         audioRecorderPlayer.mmssss(Math.floor(e.currentPosition))
       );
@@ -114,20 +112,50 @@ const App: React.FC = () => {
   async function onStopRecording() {
     const result = await audioRecorderPlayer.stopRecorder();
     audioRecorderPlayer.removeRecordBackListener();
-    setRecordingSecs(0);
     setRecordingTime("00:00:00");
     console.log(result);
     setAudioRecorderPlayer(new AudioRecorderPlayer());
-    setIsModalOpen(false);
+    setIsRecordModalOpen(false);
+    addReview();
   }
+
+  //inserting review
+  async function addReview() {
+    let review: string = "";
+
+    RNFetchBlob.fs.readStream(reviewUri, "base64").then((ifstream) => {
+      ifstream.open();
+      ifstream.onData((chunk: string | number[]) => {
+        if (typeof chunk === "string") review += chunk;
+      });
+      ifstream.onError((err) => {
+        console.log("oops", err);
+      });
+      ifstream.onEnd(() => {
+        const buffer = Buffer.from(review);
+        const bufString = buffer.toString("hex");
+        ApiService.put(`/library/${selectedMovie?.id}`, {
+          review: "\\x" + bufString,
+        })
+          .then(() => getMovies())
+          .catch((error) => console.log(error));
+      });
+    });
+  }
+
+  //delete review
+  function onDelete(movie: MovieInterface) {}
+
+  //play review
+  function onPlay(review: Buffer) {}
 
   return (
     <Provider>
       <SafeAreaView style={appStyle.container}>
         <Portal>
           <Modal
-            visible={isModalOpen}
-            onDismiss={() => setIsModalOpen(false)}
+            visible={isRecordModalOpen}
+            onDismiss={() => setIsRecordModalOpen(false)}
             style={appStyle.modal}
           >
             {isPermissionGranted ? (
@@ -165,7 +193,12 @@ const App: React.FC = () => {
         <Title style={appStyle.title}>My Library</Title>
 
         {!isLoading && movies.length > 0 && (
-          <MovieCarousel movies={movies} onRecord={onRecord} />
+          <MovieCarousel
+            movies={movies}
+            onRecord={onRecord}
+            onPlay={onPlay}
+            onDelete={onDelete}
+          />
         )}
         {!isLoading && movies.length == 0 && (
           <View style={appStyle.noMoviesContainer}>

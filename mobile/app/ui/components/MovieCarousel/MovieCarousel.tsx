@@ -7,11 +7,15 @@ import { MovieCard, ITEM_WIDTH, SLIDER_WIDTH } from "../MovieCard/MovieCard";
 interface MovieCarouselProps {
   movies: MovieInterface[];
   onRecord: Function;
+  onPlay: Function;
+  onDelete: Function;
 }
 
 export const MovieCarousel: React.FC<MovieCarouselProps> = ({
   movies,
   onRecord,
+  onPlay,
+  onDelete,
 }) => {
   const [index, setIndex] = useState<number>(0);
   const carouselRef = useRef<Carousel<MovieInterface>>(null);
@@ -24,7 +28,13 @@ export const MovieCarousel: React.FC<MovieCarouselProps> = ({
         ref={carouselRef}
         data={movies}
         renderItem={({ item, index }) => (
-          <MovieCard item={item} index={index} onRecord={onRecord} />
+          <MovieCard
+            item={item}
+            index={index}
+            onRecord={onRecord}
+            onPlay={onPlay}
+            onDelete={onDelete}
+          />
         )}
         sliderWidth={SLIDER_WIDTH}
         itemWidth={ITEM_WIDTH}

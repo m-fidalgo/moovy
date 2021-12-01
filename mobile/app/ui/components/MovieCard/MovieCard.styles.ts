@@ -12,8 +12,12 @@ export const movieCardStyle = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  actions: {
+  withoutReview: {
     justifyContent: "center",
+    height: 80,
+  },
+  withReview: {
+    justifyContent: "space-around",
     height: 80,
   },
 });
