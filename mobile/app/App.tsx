@@ -113,21 +113,27 @@ const App: React.FC = () => {
     for (let i = 0; i < unsynchedMovies.length; i++) {
       const { movie, review } = unsynchedMovies[i];
       setSelectedMovie(movie);
-      if (review === null) deleteReviewDb();
-      else addReview();
+      if (review == null) await deleteReviewDb();
+      else {
+        setReviewUri(review);
+        await addReview();
+      }
     }
 
     setUnsynchedMovies([]);
     await AsyncStorage.clear();
   }
 
+  async function loadAfterNetChange() {
+    await getUnsynchedMovies();
+    await pushUnsynched();
+  }
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       //setIsConnected(state.isConnected ? state.isConnected : false);
       setIsConnected(state.type === "wifi" ? false : true);
-      getUnsynchedMovies();
-      if (isConnected && unsynchedMovies.length > 0) pushUnsynched();
-      getMovies();
+      if (isConnected) loadAfterNetChange();
     });
 
     return () => {
@@ -137,6 +143,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     getPermissions();
+    getMovies();
   }, []);
 
   //recording
@@ -177,11 +184,11 @@ const App: React.FC = () => {
     setAudioRecorderPlayer(new AudioRecorderPlayer());
     setIsRecordModalOpen(false);
 
-    if (isConnected) addReview();
+    if (isConnected) await addReview();
     else {
       if (selectedMovie?.id) {
         await AsyncStorage.setItem((selectedMovie?.id).toString(), reviewUri);
-        getUnsynchedMovies();
+        await getUnsynchedMovies();
       }
     }
   }
@@ -216,11 +223,11 @@ const App: React.FC = () => {
 
   async function deleteReview() {
     if (isConnected) {
-      deleteReviewDb();
+      await deleteReviewDb();
     } else {
       if (selectedMovie?.id) {
         await AsyncStorage.setItem((selectedMovie?.id).toString(), reviewUri);
-        getUnsynchedMovies();
+        await getUnsynchedMovies();
       }
     }
     setIsDeleteModalOpen(false);
