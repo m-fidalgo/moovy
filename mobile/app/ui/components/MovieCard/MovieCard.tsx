@@ -28,7 +28,7 @@ export const MovieCard: React.FC<MovieProps> = ({
     <Card style={movieCardStyle.card} key={index}>
       <Card.Cover source={{ uri: item.poster }} style={movieCardStyle.img} />
       <Card.Content style={movieCardStyle.content}>
-        <Title>{item.title}</Title>
+        <Title style={movieCardStyle.title}>{item.title}</Title>
       </Card.Content>
 
       {item.review === null ? (

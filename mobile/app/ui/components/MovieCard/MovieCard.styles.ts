@@ -12,6 +12,9 @@ export const movieCardStyle = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
+  title: {
+    textAlign: "center",
+  },
   withoutReview: {
     justifyContent: "center",
     height: 80,

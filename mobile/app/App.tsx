@@ -14,20 +14,21 @@ import AudioRecorderPlayer, {
   AudioSet,
   AudioSourceAndroidType,
 } from "react-native-audio-recorder-player";
-import { Provider, Title, Portal, Modal } from "react-native-paper";
+import { Provider, Title } from "react-native-paper";
 import { Buffer } from "buffer";
 import { MovieCarousel } from "./ui/components/MovieCarousel/MovieCarousel";
 import { appStyle } from "./ui/styles/App.styles";
 import { MovieInterface } from "./data/@types/MovieInterface";
 import { ApiService } from "./data/services/ApiService";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import ButtonIcon from "./ui/components/ButtonIcon/ButtonIcon";
 import RNFetchBlob from "rn-fetch-blob";
+import RecordModal from "./ui/components/RecordModal/RecordModal";
+import DeleteModal from "./ui/components/DeleteModal/DeleteModal";
 
 const App: React.FC = () => {
   const [movies, setMovies] = useState<MovieInterface[]>([]),
     [isLoading, setIsLoading] = useState<boolean>(true),
     [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false),
+    [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false),
     [selectedMovie, setSelectedMovie] = useState<MovieInterface>(),
     [isPermissionGranted, setIsPermissionGranted] = useState<boolean>(false),
     [reviewUri, setReviewUri] = useState<string>(""),
@@ -144,7 +145,21 @@ const App: React.FC = () => {
   }
 
   //delete review
-  function onDelete(movie: MovieInterface) {}
+  function onDelete(movie: MovieInterface) {
+    setSelectedMovie(movie);
+    setIsDeleteModalOpen(true);
+  }
+
+  async function deleteReview() {
+    ApiService.put(`/library/${selectedMovie?.id}`, {
+      review: null,
+    })
+      .then(() => {
+        getMovies();
+        setIsDeleteModalOpen(false);
+      })
+      .catch((error) => console.log(error));
+  }
 
   //play review
   function onPlay(review: Buffer) {}
@@ -152,46 +167,21 @@ const App: React.FC = () => {
   return (
     <Provider>
       <SafeAreaView style={appStyle.container}>
-        <Portal>
-          <Modal
-            visible={isRecordModalOpen}
-            onDismiss={() => setIsRecordModalOpen(false)}
-            style={appStyle.modal}
-          >
-            {isPermissionGranted ? (
-              <>
-                <View style={appStyle.recordingTimeContainer}>
-                  <Icon name="fiber-manual-record" size={30} color="#FE0000" />
-                  <Text style={appStyle.recordingTime}>{recordingTime}</Text>
-                </View>
-                <View style={appStyle.recordingButtonsContainer}>
-                  <ButtonIcon
-                    onPress={() => onStartRecording()}
-                    name="mic-none"
-                    color="#000000"
-                    backgroundColor="#6CD3AE"
-                    size={30}
-                  />
-                  <ButtonIcon
-                    onPress={() => onStopRecording()}
-                    name="stop"
-                    color="#000000"
-                    backgroundColor="#FE6D8E"
-                    size={30}
-                  />
-                </View>
-              </>
-            ) : (
-              <View>
-                <Text style={appStyle.modalErrorText}>
-                  Permissions not granted
-                </Text>
-              </View>
-            )}
-          </Modal>
-        </Portal>
+        <RecordModal
+          isOpen={isRecordModalOpen}
+          setIsOpen={setIsRecordModalOpen}
+          isPermissionGranted={isPermissionGranted}
+          recordingTime={recordingTime}
+          onStartRecording={onStartRecording}
+          onStopRecording={onStopRecording}
+        />
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          setIsOpen={setIsDeleteModalOpen}
+          movie={selectedMovie}
+          deleteReview={deleteReview}
+        />
         <Title style={appStyle.title}>My Library</Title>
-
         {!isLoading && movies.length > 0 && (
           <MovieCarousel
             movies={movies}
