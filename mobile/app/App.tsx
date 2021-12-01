@@ -28,11 +28,14 @@ const App: React.FC = () => {
   const [movies, setMovies] = useState<MovieInterface[]>([]),
     [isLoading, setIsLoading] = useState<boolean>(true),
     [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false),
+    [isPlayModalOpen, setIsPlayModalOpen] = useState<boolean>(false),
     [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false),
     [selectedMovie, setSelectedMovie] = useState<MovieInterface>(),
     [isPermissionGranted, setIsPermissionGranted] = useState<boolean>(false),
     [reviewUri, setReviewUri] = useState<string>(""),
     [recordingTime, setRecordingTime] = useState<string>("00:00:00"),
+    [playingTime, setPlayingTime] = useState<string>("00:00:00"),
+    [durationTime, setDurationTime] = useState<string>("00:00:00"),
     [audioRecorderPlayer, setAudioRecorderPlayer] = useState(
       new AudioRecorderPlayer()
     );
@@ -85,7 +88,7 @@ const App: React.FC = () => {
   }
 
   async function onStartRecording() {
-    const audioSet = {
+    const audioSet: AudioSet = {
       AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
       AudioSourceAndroid: AudioSourceAndroidType.MIC,
       AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
@@ -106,15 +109,13 @@ const App: React.FC = () => {
       return;
     });
 
-    console.log(uri);
     if (uri !== "") setReviewUri(uri);
   }
 
   async function onStopRecording() {
-    const result = await audioRecorderPlayer.stopRecorder();
+    await audioRecorderPlayer.stopRecorder();
     audioRecorderPlayer.removeRecordBackListener();
     setRecordingTime("00:00:00");
-    console.log(result);
     setAudioRecorderPlayer(new AudioRecorderPlayer());
     setIsRecordModalOpen(false);
     addReview();
@@ -162,7 +163,60 @@ const App: React.FC = () => {
   }
 
   //play review
-  function onPlay(review: Buffer) {}
+  function onPlay(movie: MovieInterface) {
+    setSelectedMovie(movie);
+    setIsPlayModalOpen(true);
+  }
+
+  function createReviewFile(review: Buffer) {
+    const dirs = RNFetchBlob.fs.dirs;
+    const path =
+      Platform.select({
+        ios: `${selectedMovie?.imdb_id}-review.m4a`,
+        android: `${dirs.CacheDir}/${selectedMovie?.imdb_id}-review.mp3`,
+      }) || "";
+
+    RNFetchBlob.fs.writeStream(path, "base64").then((stream) => {
+      if (review) {
+        const bufString = review.toString("hex");
+        stream.write(RNFetchBlob.base64.encode(bufString));
+      }
+      return stream.close();
+    });
+
+    return path;
+  }
+
+  async function onStartPlaying() {
+    const path = createReviewFile(selectedMovie?.review as Buffer);
+    console.log(path);
+    audioRecorderPlayer
+      .startPlayer(path)
+      .then((msg) => console.log(msg))
+      .then(() => {
+        audioRecorderPlayer.addPlayBackListener((e) => {
+          setPlayingTime(
+            audioRecorderPlayer.mmssss(Math.floor(e.currentPosition))
+          );
+          setDurationTime(audioRecorderPlayer.mmssss(Math.floor(e.duration)));
+          return;
+        });
+      })
+      .catch((err) => console.log(err));
+  }
+
+  async function onStopPlaying() {
+    audioRecorderPlayer
+      .stopPlayer()
+      .then(() => {
+        audioRecorderPlayer.removePlayBackListener();
+        setPlayingTime("00:00:00");
+        setDurationTime("00:00:00");
+        setAudioRecorderPlayer(new AudioRecorderPlayer());
+        setIsPlayModalOpen(false);
+      })
+      .catch((err) => console.log(err));
+  }
 
   return (
     <Provider>
@@ -171,9 +225,20 @@ const App: React.FC = () => {
           isOpen={isRecordModalOpen}
           setIsOpen={setIsRecordModalOpen}
           isPermissionGranted={isPermissionGranted}
-          recordingTime={recordingTime}
-          onStartRecording={onStartRecording}
-          onStopRecording={onStopRecording}
+          time={recordingTime}
+          onStart={onStartRecording}
+          onStop={onStopRecording}
+          isRecording={true}
+        />
+        <RecordModal
+          isOpen={isPlayModalOpen}
+          setIsOpen={setIsPlayModalOpen}
+          isPermissionGranted={isPermissionGranted}
+          time={playingTime}
+          onStart={onStartPlaying}
+          onStop={onStopPlaying}
+          isRecording={false}
+          duration={durationTime}
         />
         <DeleteModal
           isOpen={isDeleteModalOpen}

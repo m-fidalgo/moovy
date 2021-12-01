@@ -5,5 +5,5 @@ export interface MovieInterface {
   poster: string;
   year: number;
   is_on_library?: boolean;
-  review?: string;
+  review?: Buffer;
 }

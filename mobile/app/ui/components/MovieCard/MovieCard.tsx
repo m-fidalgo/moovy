@@ -44,7 +44,7 @@ export const MovieCard: React.FC<MovieProps> = ({
       ) : (
         <Card.Actions style={movieCardStyle.withReview}>
           <ButtonIcon
-            onPress={() => onPlay(item.review)}
+            onPress={() => onPlay(item)}
             name="play-arrow"
             size={30}
             color="#000000"

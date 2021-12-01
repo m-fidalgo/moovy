@@ -9,9 +9,11 @@ interface RecordModalProps {
   isOpen: boolean;
   setIsOpen: Function;
   isPermissionGranted: boolean;
-  recordingTime: string;
-  onStartRecording: Function;
-  onStopRecording: Function;
+  time: string;
+  onStart: Function;
+  onStop: Function;
+  isRecording: boolean;
+  duration?: string;
 }
 
 const RecordModal: React.FC<RecordModalProps> = (props) => {
@@ -24,22 +26,26 @@ const RecordModal: React.FC<RecordModalProps> = (props) => {
       >
         {props.isPermissionGranted ? (
           <>
-            <View style={recordModalStyle.recordingTimeContainer}>
+            <View style={recordModalStyle.timeContainer}>
               <Icon name="fiber-manual-record" size={30} color="#FE0000" />
-              <Text style={recordModalStyle.recordingTime}>
-                {props.recordingTime}
-              </Text>
+              {props.isRecording ? (
+                <Text style={recordModalStyle.recordingTime}>{props.time}</Text>
+              ) : (
+                <Text style={recordModalStyle.playingTime}>
+                  {props.time} / {props.duration}
+                </Text>
+              )}
             </View>
-            <View style={recordModalStyle.recordingButtonsContainer}>
+            <View style={recordModalStyle.buttonsContainer}>
               <ButtonIcon
-                onPress={() => props.onStartRecording()}
-                name="mic-none"
+                onPress={() => props.onStart()}
+                name={props.isRecording ? "mic-none" : "play-arrow"}
                 color="#000000"
                 backgroundColor="#6CD3AE"
                 size={30}
               />
               <ButtonIcon
-                onPress={() => props.onStopRecording()}
+                onPress={() => props.onStop()}
                 name="stop"
                 color="#000000"
                 backgroundColor="#FE6D8E"

@@ -10,14 +10,13 @@ export const recordModalStyle = StyleSheet.create({
     backgroundColor: "#12153D",
     opacity: 0.9,
   },
-  recordingTimeContainer: {
+  timeContainer: {
     display: "flex",
     flexDirection: "row",
-    paddingHorizontal: 50,
     justifyContent: "center",
     alignItems: "center",
   },
-  recordingButtonsContainer: {
+  buttonsContainer: {
     display: "flex",
     flexDirection: "row",
     paddingHorizontal: 30,
@@ -28,6 +27,11 @@ export const recordModalStyle = StyleSheet.create({
   recordingTime: {
     color: "#fff",
     fontSize: 30,
+    marginLeft: 15,
+  },
+  playingTime: {
+    color: "#fff",
+    fontSize: 15,
     marginLeft: 15,
   },
   modalErrorText: {
