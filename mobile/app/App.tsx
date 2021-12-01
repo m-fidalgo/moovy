@@ -14,19 +14,26 @@ import AudioRecorderPlayer, {
   AudioSet,
   AudioSourceAndroidType,
 } from "react-native-audio-recorder-player";
-import { Provider, Title } from "react-native-paper";
+import { ActivityIndicator, Provider, Title } from "react-native-paper";
 import { Buffer } from "buffer";
 import { MovieCarousel } from "./ui/components/MovieCarousel/MovieCarousel";
 import { appStyle } from "./ui/styles/App.styles";
 import { MovieInterface } from "./data/@types/MovieInterface";
+import { UnsynchedMovieInterface } from "./data/@types/UnsynchedMovieInterface";
 import { ApiService } from "./data/services/ApiService";
+import AsyncStorage from "@react-native-community/async-storage";
+import NetInfo from "@react-native-community/netinfo";
 import RNFetchBlob from "rn-fetch-blob";
 import RecordModal from "./ui/components/RecordModal/RecordModal";
 import DeleteModal from "./ui/components/DeleteModal/DeleteModal";
 
 const App: React.FC = () => {
   const [movies, setMovies] = useState<MovieInterface[]>([]),
+    [unsynchedMovies, setUnsynchedMovies] = useState<UnsynchedMovieInterface[]>(
+      []
+    ),
     [isLoading, setIsLoading] = useState<boolean>(true),
+    [isConnected, setIsConnected] = useState<boolean>(true),
     [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false),
     [isPlayModalOpen, setIsPlayModalOpen] = useState<boolean>(false),
     [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false),
@@ -68,6 +75,7 @@ const App: React.FC = () => {
       data
         .map((movie) => {
           movie.is_on_library = true;
+          movie.is_synched = true;
           return movie;
         })
         .sort((a, b) => (a.title > b.title ? 1 : -1))
@@ -75,10 +83,61 @@ const App: React.FC = () => {
     setIsLoading(false);
   }
 
+  async function getUnsynchedMovies() {
+    const keys = await AsyncStorage.getAllKeys();
+
+    if (keys.length > 0) {
+      const unsync = [] as MovieInterface[];
+      movies.map((movie) => {
+        if (keys.find((item) => parseInt(item) === movie.id)) {
+          unsync.push(movie);
+          movie.is_synched = false;
+        } else movie.is_synched = true;
+        return movie;
+      });
+
+      for (let i = 0; i < keys.length; i++) {
+        AsyncStorage.getItem(keys[i]).then((review) => {
+          let movie = {
+            movie: unsync[0],
+            review: review as string,
+          };
+
+          setUnsynchedMovies([...unsynchedMovies, movie]);
+        });
+      }
+    }
+  }
+
+  async function pushUnsynched() {
+    for (let i = 0; i < unsynchedMovies.length; i++) {
+      const { movie, review } = unsynchedMovies[i];
+      setSelectedMovie(movie);
+      if (review === null) deleteReviewDb();
+      else addReview();
+    }
+
+    getMovies();
+    setUnsynchedMovies([]);
+    await AsyncStorage.clear();
+  }
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      //setIsConnected(state.isConnected ? state.isConnected : false);
+      setIsConnected(state.type === "wifi" ? false : true);
+      getUnsynchedMovies();
+      if (isConnected && unsynchedMovies.length > 0) pushUnsynched();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isConnected]);
+
   useEffect(() => {
     getPermissions();
     getMovies();
-    return () => {};
   }, []);
 
   //recording
@@ -118,7 +177,14 @@ const App: React.FC = () => {
     setRecordingTime("00:00:00");
     setAudioRecorderPlayer(new AudioRecorderPlayer());
     setIsRecordModalOpen(false);
-    addReview();
+
+    if (isConnected) addReview();
+    else {
+      if (selectedMovie?.id) {
+        await AsyncStorage.setItem((selectedMovie?.id).toString(), reviewUri);
+        getUnsynchedMovies();
+      }
+    }
   }
 
   //inserting review
@@ -130,9 +196,7 @@ const App: React.FC = () => {
       ifstream.onData((chunk: string | number[]) => {
         if (typeof chunk === "string") review += chunk;
       });
-      ifstream.onError((err) => {
-        console.log("oops", err);
-      });
+      ifstream.onError((error) => console.log(error));
       ifstream.onEnd(() => {
         const buffer = Buffer.from(review);
         const bufString = buffer.toString("hex");
@@ -152,12 +216,23 @@ const App: React.FC = () => {
   }
 
   async function deleteReview() {
+    if (isConnected) {
+      deleteReviewDb();
+    } else {
+      if (selectedMovie?.id) {
+        await AsyncStorage.setItem((selectedMovie?.id).toString(), reviewUri);
+        getUnsynchedMovies();
+      }
+    }
+    setIsDeleteModalOpen(false);
+  }
+
+  async function deleteReviewDb() {
     ApiService.put(`/library/${selectedMovie?.id}`, {
       review: null,
     })
       .then(() => {
         getMovies();
-        setIsDeleteModalOpen(false);
       })
       .catch((error) => console.log(error));
   }
@@ -246,26 +321,31 @@ const App: React.FC = () => {
           movie={selectedMovie}
           deleteReview={deleteReview}
         />
-        <Title style={appStyle.title}>My Library</Title>
-        {!isLoading && movies.length > 0 && (
-          <MovieCarousel
-            movies={movies}
-            onRecord={onRecord}
-            onPlay={onPlay}
-            onDelete={onDelete}
-          />
-        )}
-        {!isLoading && movies.length == 0 && (
-          <View style={appStyle.noMoviesContainer}>
-            <Image
-              style={appStyle.img}
-              source={require("./assets/search.png")}
-            />
-            <Text style={appStyle.message}>
-              It looks like there are no movies in your library! Go to you web
-              application and add some!
-            </Text>
-          </View>
+        {isLoading ? (
+          <ActivityIndicator color="#F2911B" size="large" />
+        ) : (
+          <>
+            <Title style={appStyle.title}>My Library</Title>
+            {movies.length > 0 ? (
+              <MovieCarousel
+                movies={movies}
+                onRecord={onRecord}
+                onPlay={onPlay}
+                onDelete={onDelete}
+              />
+            ) : (
+              <View style={appStyle.noMoviesContainer}>
+                <Image
+                  style={appStyle.img}
+                  source={require("./assets/search.png")}
+                />
+                <Text style={appStyle.message}>
+                  It looks like there are no movies in your library! Go to you
+                  web application and add some!
+                </Text>
+              </View>
+            )}
+          </>
         )}
       </SafeAreaView>
     </Provider>

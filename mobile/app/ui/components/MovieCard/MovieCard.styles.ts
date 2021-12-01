@@ -15,6 +15,14 @@ export const movieCardStyle = StyleSheet.create({
   title: {
     textAlign: "center",
   },
+  pending: {
+    backgroundColor: "#A1A1A1",
+    color: "#000000",
+    borderRadius: 20,
+    textAlign: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   withoutReview: {
     justifyContent: "center",
     height: 80,
