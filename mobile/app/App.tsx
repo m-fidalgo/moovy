@@ -100,7 +100,7 @@ const App: React.FC = () => {
         AsyncStorage.getItem(keys[i]).then((review) => {
           let movie = {
             movie: unsync[0],
-            review: review as string,
+            review: review,
           };
 
           setUnsynchedMovies([...unsynchedMovies, movie]);
@@ -117,7 +117,6 @@ const App: React.FC = () => {
       else addReview();
     }
 
-    getMovies();
     setUnsynchedMovies([]);
     await AsyncStorage.clear();
   }
@@ -128,6 +127,7 @@ const App: React.FC = () => {
       setIsConnected(state.type === "wifi" ? false : true);
       getUnsynchedMovies();
       if (isConnected && unsynchedMovies.length > 0) pushUnsynched();
+      getMovies();
     });
 
     return () => {
@@ -137,7 +137,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     getPermissions();
-    getMovies();
   }, []);
 
   //recording
