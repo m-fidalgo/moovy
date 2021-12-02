@@ -1,13 +1,13 @@
-import type { NextPage } from 'next';
-import { useState, useEffect } from 'react';
-import { MainContainer, SubContainer } from '../ui/styles/index.styled';
-import { MovieInterface } from '../data/@types/MovieInterface';
-import useApiGet from '../data/hooks/useApiGet';
-import Header from '../ui/components/Header/Header';
-import TextInput from '../ui/components/TextInput/TextInput';
-import MovieList from '../ui/components/MovieList/MovieList';
-import ErrorContainer from '../ui/components/ErrorContainer/ErrorContainer';
-import { Button } from '@mui/material';
+import type { NextPage } from "next";
+import { useState, useEffect } from "react";
+import { MainContainer, SubContainer } from "../ui/styles/index.styled";
+import { MovieInterface } from "../data/@types/MovieInterface";
+import useApiGet from "../data/hooks/useApiGet";
+import Header from "../ui/components/Header/Header";
+import TextInput from "../ui/components/TextInput/TextInput";
+import MovieList from "../ui/components/MovieList/MovieList";
+import ErrorContainer from "../ui/components/ErrorContainer/ErrorContainer";
+import { Button } from "@mui/material";
 
 const Home: NextPage = () => {
   const {
@@ -31,8 +31,8 @@ const Home: NextPage = () => {
   }, [isLibrarySelected, libraryMovies, allMovies]);
 
   function toggleView(library: boolean) {
-    setText('');
-    setError('');
+    setText("");
+    setError("");
     setIsLibrarySelected(library);
 
     if (library) getLibraryMovies();
@@ -43,7 +43,7 @@ const Home: NextPage = () => {
   }
 
   function onAdd(movie: MovieInterface) {
-    console.log('a');
+    console.log("a");
   }
 
   function onRemove(movie: MovieInterface) {}
@@ -57,10 +57,10 @@ const Home: NextPage = () => {
       />
       <SubContainer>
         <TextInput value={text} onChange={(e) => setText(e.target.value)} />
-        <Button variant='contained' onClick={() => onSearch()}>
+        <Button variant="contained" onClick={() => onSearch()}>
           Search
         </Button>
-        {!isLoading && movies.length > 0 && error === '' && (
+        {!isLoading && movies.length > 0 && error === "" && (
           <MovieList movies={movies} onAdd={onAdd} onRemove={onRemove} />
         )}
         {!isLoading && error && <ErrorContainer error={error} />}

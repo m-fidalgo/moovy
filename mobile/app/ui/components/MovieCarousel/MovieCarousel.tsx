@@ -1,15 +1,10 @@
-import React, { useState, useRef, Component } from "react";
-import { View } from "react-native";
+import React, { useState, useRef } from "react";
 import Carousel, { Pagination } from "react-native-snap-carousel";
+import { View } from "react-native";
+
 import { MovieInterface } from "../../../data/@types/MovieInterface";
 import { MovieCard, ITEM_WIDTH, SLIDER_WIDTH } from "../MovieCard/MovieCard";
-
-interface MovieCarouselProps {
-  movies: MovieInterface[];
-  onRecord: Function;
-  onPlay: Function;
-  onDelete: Function;
-}
+import { MovieCarouselProps } from "./MovieCarousel.types";
 
 export const MovieCarousel: React.FC<MovieCarouselProps> = ({
   movies,

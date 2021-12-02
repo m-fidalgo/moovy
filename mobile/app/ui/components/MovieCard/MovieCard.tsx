@@ -1,18 +1,10 @@
 import * as React from "react";
-import { Dimensions, Image, Text, View } from "react-native";
-import { Button, Card, Title } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { MovieInterface } from "../../../data/@types/MovieInterface";
-import ButtonIcon from "../ButtonIcon/ButtonIcon";
-import { movieCardStyle } from "./MovieCard.styles";
+import { Dimensions, Text } from "react-native";
+import { Card, Title } from "react-native-paper";
 
-interface MovieProps {
-  item: MovieInterface;
-  index: number;
-  onRecord: Function;
-  onPlay: Function;
-  onDelete: Function;
-}
+import ButtonIcon from "../../../../components/ButtonIcon/ButtonIcon";
+import { movieCardStyle } from "./MovieCard.styles";
+import { MovieProps } from "./MovieCard.types";
 
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);

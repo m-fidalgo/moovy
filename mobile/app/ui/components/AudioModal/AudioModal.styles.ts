@@ -1,15 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const recordModalStyle = StyleSheet.create({
-  modal: {
-    borderRadius: 20,
-    marginTop: 400,
-    marginBottom: 70,
-    marginHorizontal: 25,
-    padding: 50,
-    backgroundColor: "#12153D",
-    opacity: 0.9,
-  },
+export const audioModalStyle = StyleSheet.create({
   timeContainer: {
     display: "flex",
     flexDirection: "row",
