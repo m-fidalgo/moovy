@@ -5,7 +5,7 @@
 <p>Aplicação web e mobile que permite que um usuário procure seus filmes favoritos, gerenciando uma "biblioteca" em que filmes já vistos podem ser salvos e é possível fazer upload de uma review em áudio</p>
 
 <h3>Funcionalidades</h3>
-<li>:hourglass_flowing_sand: Pesquisa de filmes usando a <a href="http://www.omdbapi.com/">OMDB API</a></li>
+<li>:heavy_check_mark: Pesquisa de filmes usando a <a href="http://www.omdbapi.com/">OMDB API</a></li>
 <li>:hourglass_flowing_sand: Inserção e remoção de filmes na biblioteca</a></li>
 <li>:hourglass_flowing_sand: Inserção e remoção de reviews nos filmes da biblioteca</a></li>
 
