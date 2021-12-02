@@ -1,45 +1,46 @@
 import type { NextPage } from "next";
-import { useState, useEffect } from "react";
-import { MainContainer, SubContainer } from "../ui/styles/index.styled";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { RootState, Dispatch } from "../data/stores/store";
+import {
+  LoadingContainer,
+  MainContainer,
+  SubContainer,
+} from "../ui/styles/index.styled";
 import { MovieInterface } from "../data/@types/MovieInterface";
-import useApiGet from "../data/hooks/useApiGet";
 import Header from "../ui/components/Header/Header";
 import TextInput from "../ui/components/TextInput/TextInput";
 import MovieList from "../ui/components/MovieList/MovieList";
 import ErrorContainer from "../ui/components/ErrorContainer/ErrorContainer";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 
 const Home: NextPage = () => {
-  const {
-    isLoading,
-    text,
-    setText,
-    allMovies,
-    libraryMovies,
-    error,
-    setError,
-    getAllMovies,
-    getLibraryMovies,
-  } = useApiGet();
-  const [isLibrarySelected, setIsLibrarySelected] = useState(false);
-  const [movies, setMovies] = useState(
-    isLibrarySelected ? libraryMovies : allMovies
-  );
+  const moviesState = useSelector((state: RootState) => state.movies);
+  const dispatch = useDispatch<Dispatch>();
+  const [isLoading, setIsLoading] = useState(false),
+    [isLibrarySelected, setIsLibrarySelected] = useState(false),
+    [text, setText] = useState("");
 
   useEffect(() => {
-    setMovies(isLibrarySelected ? libraryMovies : allMovies);
-  }, [isLibrarySelected, libraryMovies, allMovies]);
+    if (isLibrarySelected) getMovies();
+  }, [isLibrarySelected]);
 
-  function toggleView(library: boolean) {
+  async function toggleView(library: boolean) {
     setText("");
-    setError("");
     setIsLibrarySelected(library);
 
-    if (library) getLibraryMovies();
+    dispatch.movies.CLEAR_MOVIES();
   }
 
-  function onSearch() {
-    isLibrarySelected ? getLibraryMovies() : getAllMovies();
+  async function getMovies() {
+    setIsLoading(true);
+
+    isLibrarySelected
+      ? await dispatch.movies.getLibraryMovies(text)
+      : await dispatch.movies.getOmdbMovies(text);
+
+    setIsLoading(false);
   }
 
   function onAdd(movie: MovieInterface) {
@@ -57,13 +58,27 @@ const Home: NextPage = () => {
       />
       <SubContainer>
         <TextInput value={text} onChange={(e) => setText(e.target.value)} />
-        <Button variant="contained" onClick={() => onSearch()}>
+        <Button variant="contained" onClick={() => getMovies()}>
           Search
         </Button>
-        {!isLoading && movies.length > 0 && error === "" && (
-          <MovieList movies={movies} onAdd={onAdd} onRemove={onRemove} />
+        {isLoading ? (
+          <LoadingContainer>
+            <CircularProgress />
+          </LoadingContainer>
+        ) : (
+          <>
+            {moviesState.movies.length > 0 && moviesState.error === "" && (
+              <MovieList
+                movies={moviesState.movies}
+                onAdd={onAdd}
+                onRemove={onRemove}
+              />
+            )}
+            {moviesState.error !== "" && (
+              <ErrorContainer error={moviesState.error} />
+            )}
+          </>
         )}
-        {!isLoading && error && <ErrorContainer error={error} />}
       </SubContainer>
     </MainContainer>
   );

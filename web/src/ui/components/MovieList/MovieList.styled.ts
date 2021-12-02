@@ -1,6 +1,7 @@
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 
-export const MovieListContainer = styled('div')`
+export const MovieListContainer = styled("div")`
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
 `;
