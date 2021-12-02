@@ -1,6 +1,6 @@
 import { MovieInterface } from "./MovieInterface";
 
-export interface UnsynchedMovieInterface {
+export type UnsynchedMovieInterface = {
   movie: MovieInterface;
   review: string | null;
-}
+};

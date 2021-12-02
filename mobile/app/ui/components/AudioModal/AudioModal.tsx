@@ -1,8 +1,8 @@
 import React from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import ButtonIcon from "../ButtonIcon/ButtonIcon";
 import { Text, View } from "react-native";
 
+import ButtonIcon from "../ButtonIcon/ButtonIcon";
 import ModalContainer from "../ModalContainer/ModalContainer";
 import { audioModalStyle } from "./AudioModal.styles";
 import { AudioModalProps } from "./AudioModal.types";

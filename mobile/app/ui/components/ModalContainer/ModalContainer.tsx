@@ -15,10 +15,7 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
       <Modal
         visible={isOpen}
         onDismiss={() => setIsOpen(false)}
-        style={
-          (modalStyle.modal,
-          large ? modalStyle.modalLarge : modalStyle.modalSmall)
-        }
+        style={large ? modalStyle.modalLarge : modalStyle.modalSmall}
       >
         {children}
       </Modal>

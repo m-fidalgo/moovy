@@ -1,139 +1,69 @@
 import React, { useEffect, useState } from "react";
 import {
-  Image,
   SafeAreaView,
-  Text,
+  ActivityIndicator,
   View,
-  PermissionsAndroid,
-  Platform,
+  Image,
+  Text,
 } from "react-native";
-import AudioRecorderPlayer, {
-  AVEncoderAudioQualityIOSType,
-  AVEncodingOption,
-  AudioEncoderAndroidType,
-  AudioSet,
-  AudioSourceAndroidType,
-} from "react-native-audio-recorder-player";
-import { ActivityIndicator, Title } from "react-native-paper";
-import { Buffer } from "buffer";
-import { MovieCarousel } from "../../components/MovieCarousel/MovieCarousel";
-import { mainStyle } from "./Main.styles";
-import { MovieInterface } from "../../../data/@types/MovieInterface";
-import { UnsynchedMovieInterface } from "../../../data/@types/UnsynchedMovieInterface";
-import { ApiService } from "../../../data/services/ApiService";
-import AsyncStorage from "@react-native-community/async-storage";
+import { useDispatch, useSelector } from "react-redux";
+import { Title } from "react-native-paper";
 import NetInfo from "@react-native-community/netinfo";
-import RNFetchBlob from "rn-fetch-blob";
+
+import { mainStyle } from "./Main.styles";
+import { getPermissions } from "../../../data/utils/getPermissions";
+import { RootState, Dispatch } from "../../../data/stores/store";
+import MovieCarousel from "../../components/MovieCarousel/MovieCarousel";
 import AudioModal from "../../components/AudioModal/AudioModal";
 import DeleteModal from "../../components/DeleteModal/DeleteModal";
+import { MovieInterface } from "../../../data/@types/MovieInterface";
+import { AudioService } from "../../../data/services/AudioService";
+import AudioRecorderPlayer from "react-native-audio-recorder-player";
+import { AudioFileService } from "../../../data/services/AudioFileService";
 
 const Main: React.FC = () => {
-  const [movies, setMovies] = useState<MovieInterface[]>([]),
-    [unsynchedMovies, setUnsynchedMovies] = useState<UnsynchedMovieInterface[]>(
-      []
-    ),
-    [isLoading, setIsLoading] = useState<boolean>(true),
-    [isConnected, setIsConnected] = useState<boolean>(true),
-    [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false),
-    [isPlayModalOpen, setIsPlayModalOpen] = useState<boolean>(false),
-    [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false),
+  let audioRecorderPlayer = new AudioRecorderPlayer();
+  const moviesState = useSelector((state: RootState) => state.movies);
+  const dispatch = useDispatch<Dispatch>();
+  const [isLoading, setIsLoading] = useState(true),
+    [isPermissionGranted, setIsPermissionGranted] = useState(true),
+    [isConnected, setIsConnected] = useState(false),
     [selectedMovie, setSelectedMovie] = useState<MovieInterface>(),
-    [isPermissionGranted, setIsPermissionGranted] = useState<boolean>(false),
-    [reviewUri, setReviewUri] = useState<string>(""),
-    [recordingTime, setRecordingTime] = useState<string>("00:00:00"),
-    [playingTime, setPlayingTime] = useState<string>("00:00:00"),
-    [durationTime, setDurationTime] = useState<string>("00:00:00"),
-    [audioRecorderPlayer, setAudioRecorderPlayer] = useState(
-      new AudioRecorderPlayer()
-    );
-
-  //useEffect related
-  async function getPermissions() {
-    if (Platform.OS === "android") {
-      let permission = await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      ]);
-
-      if (
-        permission["android.permission.WRITE_EXTERNAL_STORAGE"] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
-        permission["android.permission.READ_EXTERNAL_STORAGE"] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
-        permission["android.permission.RECORD_AUDIO"] ===
-          PermissionsAndroid.RESULTS.GRANTED
-      )
-        setIsPermissionGranted(true);
-      else setIsPermissionGranted(false);
-    }
-  }
+    [isRecording, setIsRecording] = useState(false),
+    [isRecordModalOpen, setIsRecordModalOpen] = useState(false),
+    [isPlayModalOpen, setIsPlayModalOpen] = useState(false),
+    [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false),
+    [uri, setUri] = useState(""),
+    [time, setTime] = useState("00:00:00"),
+    [duration, setDuration] = useState("00:00:00");
 
   async function getMovies() {
-    const { data } = await ApiService.get<MovieInterface[]>("/library");
-    setMovies(
-      data
-        .map((movie) => {
-          movie.is_on_library = true;
-          movie.is_synched = true;
-          return movie;
-        })
-        .sort((a, b) => (a.title > b.title ? 1 : -1))
-    );
+    setIsLoading(true);
+    await dispatch.movies.getMovies();
     setIsLoading(false);
   }
 
-  async function getUnsynchedMovies() {
-    const keys = await AsyncStorage.getAllKeys();
+  async function checkPermissions() {
+    setIsPermissionGranted(await getPermissions());
+  }
 
-    if (keys.length > 0) {
-      const unsync = [] as MovieInterface[];
-      movies.map((movie) => {
-        if (keys.find((item) => parseInt(item) === movie.id)) {
-          unsync.push(movie);
-          movie.is_synched = false;
-        } else movie.is_synched = true;
-        return movie;
-      });
-
-      for (let i = 0; i < keys.length; i++) {
-        AsyncStorage.getItem(keys[i]).then((review) => {
-          let movie = {
-            movie: unsync[0],
-            review: review,
-          };
-
-          setUnsynchedMovies([...unsynchedMovies, movie]);
-        });
-      }
+  async function checkConnection() {
+    if (isConnected) {
+      if (moviesState.unsynchedMovies !== [])
+        dispatch.movies.pushUnsynched(moviesState.unsynchedMovies);
     }
   }
 
-  async function pushUnsynched() {
-    for (let i = 0; i < unsynchedMovies.length; i++) {
-      const { movie, review } = unsynchedMovies[i];
-      setSelectedMovie(movie);
-      if (review == null) await deleteReviewDb();
-      else {
-        setReviewUri(review);
-        await addReview();
-      }
-    }
-
-    setUnsynchedMovies([]);
-    await AsyncStorage.clear();
-  }
-
-  async function loadAfterNetChange() {
-    await getUnsynchedMovies();
-    await pushUnsynched();
-  }
+  useEffect(() => {
+    checkPermissions();
+    getMovies();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       //setIsConnected(state.isConnected ? state.isConnected : false);
       setIsConnected(state.type === "wifi" ? false : true);
-      if (isConnected) loadAfterNetChange();
+      checkConnection();
     });
 
     return () => {
@@ -141,208 +71,129 @@ const Main: React.FC = () => {
     };
   }, [isConnected]);
 
-  useEffect(() => {
-    getPermissions();
-    getMovies();
-  }, []);
-
   //recording
-  async function onRecord(movie: MovieInterface) {
-    setIsRecordModalOpen(true);
+  function onClickRecord(movie: MovieInterface) {
     setSelectedMovie(movie);
+    setIsRecording(true);
+    setIsRecordModalOpen(true);
   }
 
   async function onStartRecording() {
-    const audioSet: AudioSet = {
-      AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
-      AudioSourceAndroid: AudioSourceAndroidType.MIC,
-      AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
-      AVNumberOfChannelsKeyIOS: 2,
-      AVFormatIDKeyIOS: AVEncodingOption.aac,
-    };
-    const dirs = RNFetchBlob.fs.dirs;
-    const path = Platform.select({
-      ios: `${selectedMovie?.imdb_id}-review.m4a`,
-      android: `${dirs.CacheDir}/${selectedMovie?.imdb_id}-review.mp3`,
-    });
-
-    const uri = await audioRecorderPlayer.startRecorder(path, audioSet);
-    audioRecorderPlayer.addRecordBackListener((e) => {
-      setRecordingTime(
-        audioRecorderPlayer.mmssss(Math.floor(e.currentPosition))
-      );
-      return;
-    });
-
-    if (uri !== "") setReviewUri(uri);
+    setUri(
+      await AudioService.onStartRecording(
+        audioRecorderPlayer,
+        `${selectedMovie?.imdb_id}-review`,
+        setTime
+      )
+    );
   }
 
   async function onStopRecording() {
-    await audioRecorderPlayer.stopRecorder();
-    audioRecorderPlayer.removeRecordBackListener();
-    setRecordingTime("00:00:00");
-    setAudioRecorderPlayer(new AudioRecorderPlayer());
+    await AudioService.onStopRecording(audioRecorderPlayer, setTime);
     setIsRecordModalOpen(false);
-
-    if (isConnected) await addReview();
-    else {
-      if (selectedMovie?.id) {
-        await AsyncStorage.setItem((selectedMovie?.id).toString(), reviewUri);
-        await getUnsynchedMovies();
-      }
-    }
+    if (selectedMovie !== undefined) {
+      if (isConnected)
+        await dispatch.movies.addReview({
+          id: selectedMovie?.id,
+          reviewUri: uri,
+        });
+      else
+        await dispatch.movies.addUnsynchedMovie({
+          movie: selectedMovie,
+          reviewUri: uri,
+        });
+    } else console.log("é undefined");
+    setSelectedMovie(undefined);
+    setUri("");
   }
 
-  //inserting review
-  async function addReview() {
-    let review: string = "";
-
-    RNFetchBlob.fs.readStream(reviewUri, "base64").then((ifstream) => {
-      ifstream.open();
-      ifstream.onData((chunk: string | number[]) => {
-        if (typeof chunk === "string") review += chunk;
-      });
-      ifstream.onError((error) => console.log(error));
-      ifstream.onEnd(() => {
-        const buffer = Buffer.from(review);
-        const bufString = buffer.toString("hex");
-        ApiService.put(`/library/${selectedMovie?.id}`, {
-          review: "\\x" + bufString,
-        })
-          .then(() => getMovies())
-          .catch((error) => console.log(error));
-      });
-    });
+  //playing
+  function onClickPlay(movie: MovieInterface) {
+    setSelectedMovie(movie);
+    setIsRecording(false);
+    setIsPlayModalOpen(true);
   }
 
-  //delete review
-  function onDelete(movie: MovieInterface) {
+  function onStartPlaying() {
+    let path = "";
+
+    if (selectedMovie?.review)
+      path = AudioFileService.getUriFromBuffer(
+        selectedMovie?.review,
+        `${selectedMovie?.imdb_id}-review`
+      );
+
+    AudioService.onStartPlaying(
+      audioRecorderPlayer,
+      setTime,
+      setDuration,
+      path
+    );
+  }
+
+  async function onStopPlaying() {
+    await AudioService.onStopPlaying(audioRecorderPlayer, setTime, setDuration);
+    setIsPlayModalOpen(false);
+    setSelectedMovie(undefined);
+  }
+
+  //delete
+  function onClickDelete(movie: MovieInterface) {
     setSelectedMovie(movie);
     setIsDeleteModalOpen(true);
   }
 
-  async function deleteReview() {
-    if (isConnected) {
-      await deleteReviewDb();
-    } else {
-      if (selectedMovie?.id) {
-        await AsyncStorage.setItem((selectedMovie?.id).toString(), reviewUri);
-        await getUnsynchedMovies();
+  function onDelete() {
+    if (selectedMovie !== undefined) {
+      if (isConnected) {
+        dispatch.movies.deleteReview(selectedMovie.id);
+      } else {
+        dispatch.movies.addUnsynchedMovie({
+          movie: selectedMovie,
+          reviewUri: null,
+        });
       }
+
+      setSelectedMovie(undefined);
     }
     setIsDeleteModalOpen(false);
-  }
-
-  async function deleteReviewDb() {
-    ApiService.put(`/library/${selectedMovie?.id}`, {
-      review: null,
-    })
-      .then(() => {
-        getMovies();
-      })
-      .catch((error) => console.log(error));
-  }
-
-  //play review
-  function onPlay(movie: MovieInterface) {
-    setSelectedMovie(movie);
-    setIsPlayModalOpen(true);
-  }
-
-  function createReviewFile(review: Buffer) {
-    const dirs = RNFetchBlob.fs.dirs;
-    const path =
-      Platform.select({
-        ios: `${selectedMovie?.imdb_id}-review.m4a`,
-        android: `${dirs.CacheDir}/${selectedMovie?.imdb_id}-review.mp3`,
-      }) || "";
-
-    RNFetchBlob.fs.writeStream(path, "base64").then((stream) => {
-      if (review) {
-        const bufString = review.toString("hex");
-        stream.write(RNFetchBlob.base64.encode(bufString));
-      }
-      return stream.close();
-    });
-
-    return path;
-  }
-
-  async function onStartPlaying() {
-    const path = createReviewFile(selectedMovie?.review as Buffer);
-    console.log(path);
-    audioRecorderPlayer
-      .startPlayer(path)
-      .then((msg) => console.log(msg))
-      .then(() => {
-        audioRecorderPlayer.addPlayBackListener((e) => {
-          setPlayingTime(
-            audioRecorderPlayer.mmssss(Math.floor(e.currentPosition))
-          );
-          setDurationTime(audioRecorderPlayer.mmssss(Math.floor(e.duration)));
-          return;
-        });
-      })
-      .catch((err) => console.log(err));
-  }
-
-  async function onStopPlaying() {
-    audioRecorderPlayer
-      .stopPlayer()
-      .then(() => {
-        audioRecorderPlayer.removePlayBackListener();
-        setPlayingTime("00:00:00");
-        setDurationTime("00:00:00");
-        setAudioRecorderPlayer(new AudioRecorderPlayer());
-        setIsPlayModalOpen(false);
-      })
-      .catch((err) => console.log(err));
   }
 
   return (
     <SafeAreaView style={mainStyle.container}>
       <AudioModal
-        isOpen={isRecordModalOpen}
-        setIsOpen={setIsRecordModalOpen}
+        isOpen={isRecording ? isRecordModalOpen : isPlayModalOpen}
+        setIsOpen={isRecording ? setIsRecordModalOpen : setIsPlayModalOpen}
         isPermissionGranted={isPermissionGranted}
-        time={recordingTime}
-        onStart={onStartRecording}
-        onStop={onStopRecording}
-        isRecording={true}
-      />
-      <AudioModal
-        isOpen={isPlayModalOpen}
-        setIsOpen={setIsPlayModalOpen}
-        isPermissionGranted={isPermissionGranted}
-        time={playingTime}
-        onStart={onStartPlaying}
-        onStop={onStopPlaying}
-        isRecording={false}
-        duration={durationTime}
+        time={time}
+        onStart={isRecording ? onStartRecording : onStartPlaying}
+        onStop={isRecording ? onStopRecording : onStopPlaying}
+        isRecording={isRecording}
+        duration={isRecording ? "" : duration}
       />
       <DeleteModal
         isOpen={isDeleteModalOpen}
         setIsOpen={setIsDeleteModalOpen}
         movie={selectedMovie}
-        deleteReview={deleteReview}
+        deleteReview={onDelete}
       />
       {isLoading ? (
         <ActivityIndicator color="#F2911B" size="large" />
       ) : (
         <>
           <Title style={mainStyle.title}>My Library</Title>
-          {movies.length > 0 ? (
+          {moviesState.movies.length > 0 ? (
             <MovieCarousel
-              movies={movies}
-              onRecord={onRecord}
-              onPlay={onPlay}
-              onDelete={onDelete}
+              movies={moviesState.movies}
+              onRecord={onClickRecord}
+              onPlay={onClickPlay}
+              onDelete={onClickDelete}
             />
           ) : (
             <View style={mainStyle.noMoviesContainer}>
               <Image
                 style={mainStyle.img}
-                source={require("./assets/search.png")}
+                source={require("../../../assets/search.png")}
               />
               <Text style={mainStyle.message}>
                 It looks like there are no movies in your library! Go to you web

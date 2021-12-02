@@ -6,7 +6,7 @@ import { MovieInterface } from "../../../data/@types/MovieInterface";
 import { MovieCard, ITEM_WIDTH, SLIDER_WIDTH } from "../MovieCard/MovieCard";
 import { MovieCarouselProps } from "./MovieCarousel.types";
 
-export const MovieCarousel: React.FC<MovieCarouselProps> = ({
+const MovieCarousel: React.FC<MovieCarouselProps> = ({
   movies,
   onRecord,
   onPlay,
@@ -54,3 +54,5 @@ export const MovieCarousel: React.FC<MovieCarouselProps> = ({
     </View>
   );
 };
+
+export default MovieCarousel;

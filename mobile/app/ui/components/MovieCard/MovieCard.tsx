@@ -2,7 +2,7 @@ import * as React from "react";
 import { Dimensions, Text } from "react-native";
 import { Card, Title } from "react-native-paper";
 
-import ButtonIcon from "../../../../components/ButtonIcon/ButtonIcon";
+import ButtonIcon from "../ButtonIcon/ButtonIcon";
 import { movieCardStyle } from "./MovieCard.styles";
 import { MovieProps } from "./MovieCard.types";
 
