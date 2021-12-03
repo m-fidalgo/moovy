@@ -9,12 +9,7 @@ import {
   MovieAddCircleIcon,
   MovieRemoveCircleIcon,
 } from "./Movie.styled";
-
-interface MovieProps {
-  movie: MovieInterface;
-  onAdd: Function;
-  onRemove: Function;
-}
+import { MovieProps } from "./Movie.types";
 
 const Movie: React.FC<MovieProps> = ({ movie, onAdd, onRemove }) => {
   return (

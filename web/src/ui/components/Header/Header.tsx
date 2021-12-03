@@ -8,14 +8,13 @@ import {
   HeaderDropdown,
 } from "./Header.styled";
 import MenuIcon from "@mui/icons-material/Menu";
+import { HeaderProps } from "./Header.types";
 
-interface HeaderProps {
-  isLibrarySelected: boolean;
-  onSearchSelect: Function;
-  onLibrarySelect: Function;
-}
-
-const Header: React.FC<HeaderProps> = (props) => {
+const Header: React.FC<HeaderProps> = ({
+  isLibrarySelected,
+  onSearchSelect,
+  onLibrarySelect,
+}) => {
   const hasWindow = typeof window !== "undefined";
   const [width, setWidth] = useState(hasWindow ? window.innerWidth : null);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,14 +38,14 @@ const Header: React.FC<HeaderProps> = (props) => {
         {width === null || width > 600 ? (
           <>
             <HeaderTypography
-              className={!props.isLibrarySelected ? "selected" : ""}
-              onClick={() => props.onSearchSelect()}
+              className={!isLibrarySelected ? "selected" : ""}
+              onClick={() => onSearchSelect()}
             >
               Search
             </HeaderTypography>
             <HeaderTypography
-              className={props.isLibrarySelected ? "selected" : ""}
-              onClick={() => props.onLibrarySelect()}
+              className={isLibrarySelected ? "selected" : ""}
+              onClick={() => onLibrarySelect()}
             >
               My Library
             </HeaderTypography>
@@ -65,14 +64,14 @@ const Header: React.FC<HeaderProps> = (props) => {
       {width !== null && width <= 600 && isOpen ? (
         <HeaderDropdown>
           <HeaderTypography
-            className={!props.isLibrarySelected ? "selected" : ""}
-            onClick={() => props.onSearchSelect()}
+            className={!isLibrarySelected ? "selected" : ""}
+            onClick={() => onSearchSelect()}
           >
             Search
           </HeaderTypography>
           <HeaderTypography
-            className={props.isLibrarySelected ? "selected" : ""}
-            onClick={() => props.onLibrarySelect()}
+            className={isLibrarySelected ? "selected" : ""}
+            onClick={() => onLibrarySelect()}
           >
             My Library
           </HeaderTypography>
