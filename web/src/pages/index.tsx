@@ -43,11 +43,16 @@ const Home: NextPage = () => {
     setIsLoading(false);
   }
 
-  function onAdd(movie: MovieInterface) {
-    console.log("a");
+  async function onAdd(movie: MovieInterface) {
+    await dispatch.movies.addToLibrary(movie);
   }
 
-  function onRemove(movie: MovieInterface) {}
+  async function onRemove(id: number) {
+    await dispatch.movies.removeFromLibrary({
+      id,
+      isFromLibrary: isLibrarySelected,
+    });
+  }
 
   return (
     <MainContainer>

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { IconButton } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { IconButton } from "@mui/material";
 import {
   HeaderAppBar,
   HeaderToolbar,
   HeaderLogo,
   HeaderTypography,
   HeaderDropdown,
-} from './Header.styled';
-import MenuIcon from '@mui/icons-material/Menu';
+} from "./Header.styled";
+import MenuIcon from "@mui/icons-material/Menu";
 
 interface HeaderProps {
   isLibrarySelected: boolean;
@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
-  const hasWindow = typeof window !== 'undefined';
+  const hasWindow = typeof window !== "undefined";
   const [width, setWidth] = useState(hasWindow ? window.innerWidth : null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -26,26 +26,26 @@ const Header: React.FC<HeaderProps> = (props) => {
     }
 
     if (hasWindow) {
-      window.addEventListener('resize', handleWindowResize);
-      return () => window.removeEventListener('resize', handleWindowResize);
+      window.addEventListener("resize", handleWindowResize);
+      return () => window.removeEventListener("resize", handleWindowResize);
     }
   }, []);
 
   return (
-    <HeaderAppBar position='sticky'>
+    <HeaderAppBar position="sticky">
       <HeaderToolbar>
-        <HeaderLogo src='/img/moovy.png' alt='Moovy' />
+        <HeaderLogo src="/img/moovy.png" alt="Moovy" />
 
         {width === null || width > 600 ? (
           <>
             <HeaderTypography
-              className={!props.isLibrarySelected ? 'selected' : ''}
+              className={!props.isLibrarySelected ? "selected" : ""}
               onClick={() => props.onSearchSelect()}
             >
               Search
             </HeaderTypography>
             <HeaderTypography
-              className={props.isLibrarySelected ? 'selected' : ''}
+              className={props.isLibrarySelected ? "selected" : ""}
               onClick={() => props.onLibrarySelect()}
             >
               My Library
@@ -53,9 +53,9 @@ const Header: React.FC<HeaderProps> = (props) => {
           </>
         ) : (
           <IconButton
-            edge='end'
-            color='inherit'
-            aria-label='menu'
+            edge="end"
+            color="inherit"
+            aria-label="menu"
             onClick={() => setIsOpen(!isOpen)}
           >
             <MenuIcon />
@@ -64,8 +64,18 @@ const Header: React.FC<HeaderProps> = (props) => {
       </HeaderToolbar>
       {width !== null && width <= 600 && isOpen ? (
         <HeaderDropdown>
-          <HeaderTypography className='selected'>Search</HeaderTypography>
-          <HeaderTypography>My Library</HeaderTypography>
+          <HeaderTypography
+            className={!props.isLibrarySelected ? "selected" : ""}
+            onClick={() => props.onSearchSelect()}
+          >
+            Search
+          </HeaderTypography>
+          <HeaderTypography
+            className={props.isLibrarySelected ? "selected" : ""}
+            onClick={() => props.onLibrarySelect()}
+          >
+            My Library
+          </HeaderTypography>
         </HeaderDropdown>
       ) : null}
     </HeaderAppBar>

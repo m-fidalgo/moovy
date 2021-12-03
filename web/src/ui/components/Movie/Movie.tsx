@@ -1,5 +1,5 @@
-import React from 'react';
-import { MovieInterface } from '../../../data/@types/MovieInterface';
+import React from "react";
+import { MovieInterface } from "../../../data/@types/MovieInterface";
 import {
   MovieCard,
   MovieCardMedia,
@@ -8,7 +8,7 @@ import {
   MovieCardPill,
   MovieAddCircleIcon,
   MovieRemoveCircleIcon,
-} from './Movie.styled';
+} from "./Movie.styled";
 
 interface MovieProps {
   movie: MovieInterface;
@@ -24,7 +24,7 @@ const Movie: React.FC<MovieProps> = ({ movie, onAdd, onRemove }) => {
       <MovieCardInfos>
         <MovieCardPill>{movie.year}</MovieCardPill>
         {movie.is_on_library ? (
-          <MovieRemoveCircleIcon onClick={() => onRemove(movie)} />
+          <MovieRemoveCircleIcon onClick={() => onRemove(movie.id)} />
         ) : (
           <MovieAddCircleIcon onClick={() => onAdd(movie)} />
         )}

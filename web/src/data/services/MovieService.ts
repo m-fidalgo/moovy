@@ -11,4 +11,15 @@ export const MovieService = {
   getFromOmdb(text: string) {
     return ApiService.get<MovieInterface[]>(`${omdbEndpoint}/${text}`);
   },
+  addToLibrary(movie: MovieInterface) {
+    return ApiService.post<MovieInterface>(libraryEndpoint, {
+      title: movie.title,
+      year: movie.year,
+      poster: movie.poster,
+      imdb_id: movie.imdb_id,
+    });
+  },
+  removeFromLibrary(id: number) {
+    return ApiService.delete(`${libraryEndpoint}/${id}`);
+  },
 };

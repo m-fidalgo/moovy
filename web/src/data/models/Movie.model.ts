@@ -28,6 +28,30 @@ export const movies = createModel<RootModel>()({
         error: "",
       };
     },
+    ADD_MOVIE: (state: MovieState, movie: MovieInterface) => {
+      return {
+        ...state,
+        movies: state.movies.map((item) => {
+          if (item.id === movie.id) movie.is_on_library = true;
+          return item;
+        }),
+        error: "",
+      };
+    },
+    REMOVE_MOVIE: (state: MovieState, id: number, isFromLibrary: boolean) => {
+      const movies = isFromLibrary
+        ? state.movies.filter((item) => item.id !== id)
+        : state.movies.map((item) => {
+            if (item.id === id) item.is_on_library = false;
+            return item;
+          });
+
+      return {
+        ...state,
+        movies,
+        error: "",
+      };
+    },
   },
   effects: (dispatch) => {
     const { movies } = dispatch;
@@ -66,9 +90,25 @@ export const movies = createModel<RootModel>()({
         try {
           let { data }: { data: MovieInterface[] } =
             await MovieService.getFromOmdb(text);
+
+          const libraryData: MovieInterface[] =
+            await MovieService.getFromLibrary()
+              .then((resp) => resp.data)
+              .then((data) =>
+                data.filter((movie) =>
+                  movie.title.toLowerCase().includes(text.toLowerCase())
+                )
+              );
+
           data
             .map((movie) => {
-              movie.is_on_library = false;
+              const item = libraryData.filter(
+                (item) => item.imdb_id === movie.imdb_id
+              )[0];
+              if (item) {
+                movie.is_on_library = true;
+                movie.id = item.id;
+              } else movie.is_on_library = false;
               return movie;
             })
             .sort((a, b) => (a.title > b.title ? 1 : -1));
@@ -79,6 +119,23 @@ export const movies = createModel<RootModel>()({
             [],
             "We couldn´t find the movies you were looking for :("
           );
+        }
+      },
+      async addToLibrary(movie: MovieInterface): Promise<any> {
+        try {
+          await MovieService.addToLibrary(movie);
+          movies.ADD_MOVIE(movie);
+        } catch (error) {
+          movies.SET_MOVIES([], "Error while adding to library :(");
+        }
+      },
+      async removeFromLibrary({ id, isFromLibrary }): Promise<any> {
+        try {
+          await MovieService.removeFromLibrary(id);
+
+          movies.REMOVE_MOVIE(id, isFromLibrary);
+        } catch (error) {
+          movies.SET_MOVIES([], "Error while removing library :(");
         }
       },
     };
