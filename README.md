@@ -6,7 +6,7 @@
 
 <h3>Funcionalidades</h3>
 <li>:heavy_check_mark: Pesquisa de filmes usando a <a href="http://www.omdbapi.com/">OMDB API</a></li>
-<li>:hourglass_flowing_sand: Inserção e remoção de filmes na biblioteca</a></li>
+<li>:heavy_check_mark: Inserção e remoção de filmes na biblioteca</a></li>
 <li>:hourglass_flowing_sand: Inserção e remoção de reviews nos filmes da biblioteca</a></li>
 
 <h3>Tecnologias</h3>
